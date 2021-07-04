@@ -26,7 +26,8 @@ New VAE models can be trained with following command:
 ```bash
 # Training a vae model for the environment
 # Note: Training data are loaded in line 72. Edit the path if you wish to train with other training data 
-python vae/fetch_vae/vae_fetch_push.py
+cd vae/fetch_vae
+python vae_fetch_push.py
 ```
 
 ## Agent Training
@@ -37,7 +38,7 @@ python vae/fetch_vae/vae_fetch_push.py
 python train.py --tag 000 --learn normal --env=FetchPush-v1
 # IGG (with EBP)
 python train.py --tag 100 --learn hgg --env=FetchPush-v1
-
+```
 
 ## Plotting
 To plot the agent's performance on multiple training runs, copy all training run directories into one directory. For example, we put all FetchPushLabyrinth runs in a directory called BA_Labyrinth, same for FetchPickObstacle (BA_Obstacle), FetchPickNoObstacle (BA_NoObstacle) and FetchPickAndThrow (BA_Throw). naming=0 is recommended as default. For our result plot commands, have a look at create_result_figures.sh. 
@@ -54,10 +55,13 @@ To generate a video looking at the agent solving the respective task according t
 # Scheme: python play.py --env env_id --play_path log_dir --play_epoch <epoch number, latest or best>
 
 # Example
-python play_new.py --env FetchPush-v1 --play_path figures/000-ddpg-FetchPush-v1-hgg/ --play_epoch latest
+#python play_new.py --env FetchPush-v1 --play_path figures/000-ddpg-FetchPush-v1-hgg/ --play_epoch latest
+python play.py --env FetchPush-v1 --play_path log/100-ddpg-FetchPush-v1-hgg/   --play_epoch latest
 ```
 
 ## Vanilla HGG and HER
 
 To train with Vanilla HGG and HER, change the function-names according to the instructions in the comments of 
 each [env_name].py
+
+
