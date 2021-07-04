@@ -56,6 +56,7 @@ To generate a video looking at the agent solving the respective task according t
 
 # Example
 #python play_new.py --env FetchPush-v1 --play_path figures/000-ddpg-FetchPush-v1-hgg/ --play_epoch latest
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so
 python play.py --env FetchPush-v1 --play_path log/100-ddpg-FetchPush-v1-hgg/   --play_epoch latest
 ```
 
