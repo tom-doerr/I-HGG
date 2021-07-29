@@ -181,7 +181,7 @@ if __name__ == "__main__":
     else:
         configs = sorted(data.keys())
 
-    configs = ['HER', 'HGG', 'I-HGG']
+    #configs = ['HER', 'HGG', 'I-HGG']
     for config in configs:
         print("Config: {}".format(config))
         # merge curves from runs of one config
