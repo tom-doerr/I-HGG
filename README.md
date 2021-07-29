@@ -66,3 +66,11 @@ To train with Vanilla HGG and HER, change the function-names according to the in
 each [env_name].py
 
 
+
+
+
+# Examples
+Plotting the results from own runs and saving the plot:
+```
+python plot.py log FetchPush --save_path figures/test2
+```
