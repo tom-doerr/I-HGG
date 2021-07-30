@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 def get_vars(scope_name):
-	vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=scope_name)
+	vars = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope=scope_name)
 	assert len(vars) > 0
 	return vars
 
@@ -13,16 +13,16 @@ class Normalizer:
 		self.eps_std = eps_std
 		self.norm_clip = norm_clip
 
-		with tf.variable_scope('normalizer_variables', initializer=tf.zeros_initializer()):
-			self.sum = tf.get_variable(name='sum', shape=self.shape, dtype=np.float32, trainable=False)
-			self.sum_sqr = tf.get_variable(name='sum_sqr', shape=self.shape, dtype=np.float32, trainable=False)
-			self.cnt = tf.get_variable(name='cnt', shape=[1], dtype=np.float32, trainable=False)
-			self.mean = tf.get_variable(name='mean', shape=self.shape, dtype=np.float32, trainable=False)
-			self.std = tf.get_variable(name='std', shape=self.shape, dtype=np.float32, trainable=False)
+		with tf.compat.v1.variable_scope('normalizer_variables', initializer=tf.compat.v1.zeros_initializer()):
+			self.sum = tf.compat.v1.get_variable(name='sum', shape=self.shape, dtype=np.float32, trainable=False)
+			self.sum_sqr = tf.compat.v1.get_variable(name='sum_sqr', shape=self.shape, dtype=np.float32, trainable=False)
+			self.cnt = tf.compat.v1.get_variable(name='cnt', shape=[1], dtype=np.float32, trainable=False)
+			self.mean = tf.compat.v1.get_variable(name='mean', shape=self.shape, dtype=np.float32, trainable=False)
+			self.std = tf.compat.v1.get_variable(name='std', shape=self.shape, dtype=np.float32, trainable=False)
 
-		self.add_sum = tf.placeholder(tf.float32, self.shape)
-		self.add_sum_sqr = tf.placeholder(tf.float32, self.shape)
-		self.add_cnt = tf.placeholder(tf.float32, [1])
+		self.add_sum = tf.compat.v1.placeholder(tf.float32, self.shape)
+		self.add_sum_sqr = tf.compat.v1.placeholder(tf.float32, self.shape)
+		self.add_cnt = tf.compat.v1.placeholder(tf.float32, [1])
 
 		self.update_array_op = tf.group(
 			self.sum.assign_add(self.add_sum),

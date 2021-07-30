@@ -257,31 +257,31 @@ class SummaryWriter:
 
 	def register_writer(self, summary_path, graph=None):
 		make_dir(summary_path, clear=False)
-		return tf.summary.FileWriter(summary_path, graph=graph)
+		return tf.compat.v1.summary.FileWriter(summary_path, graph=graph)
 
 	def setup(self):
 		with self.graph.as_default():
 			self.summary_ph = {}
 			self.summary = []
 			self.summary_cmp = []
-			with tf.variable_scope('summary_scope'):
+			with tf.compat.v1.variable_scope('summary_scope'):
 				for key in self.scalars.keys():
 					if self.check_prefix(key):
 						# add to test summaries
 						key_cmp = self.remove_prefix(key)
 						if not(key_cmp in self.summary_ph.keys()):
-							self.summary_ph[key_cmp] = tf.placeholder(tf.float32, name=key_cmp)
-							self.summary_cmp.append(tf.summary.scalar(key_cmp, self.summary_ph[key_cmp], family='test'))
+							self.summary_ph[key_cmp] = tf.compat.v1.placeholder(tf.float32, name=key_cmp)
+							self.summary_cmp.append(tf.compat.v1.summary.scalar(key_cmp, self.summary_ph[key_cmp], family='test'))
 					else:
 						# add to debug summaries
 						assert not(key in self.summary_ph.keys())
-						self.summary_ph[key] = tf.placeholder(tf.float32, name=key)
-						self.summary.append(tf.summary.scalar(key, self.summary_ph[key], family='train'))
+						self.summary_ph[key] = tf.compat.v1.placeholder(tf.float32, name=key)
+						self.summary.append(tf.compat.v1.summary.scalar(key, self.summary_ph[key], family='train'))
 
-			self.summary_op = tf.summary.merge(self.summary)
+			self.summary_op = tf.compat.v1.summary.merge(self.summary)
 			self.writer = self.register_writer(self.summary_path+'/debug', self.graph)
 			if len(self.summary_cmp)>0:
-				self.summary_cmp_op = tf.summary.merge(self.summary_cmp)
+				self.summary_cmp_op = tf.compat.v1.summary.merge(self.summary_cmp)
 				self.train_writer = self.register_writer(self.summary_path+'/train')
 				self.test_writer = self.register_writer(self.summary_path+'/test')
 

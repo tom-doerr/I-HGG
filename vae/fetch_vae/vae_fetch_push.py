@@ -6,6 +6,7 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
+from fastprogress.fastprogress import progress_bar, master_bar
 
 
 img_size = 84
@@ -67,14 +68,18 @@ def loss_function(recon_x, x, mu, logvar):
 
 
 # torch.Size([128, 1, img_size, img_size])
-def train(epoch, model, optimizer, device, log_interval, batch_size):
+def train(epoch, model, optimizer, device, log_interval, batch_size, master_bar_obj):
     model.train()
     train_loss = 0
     data_set = np.load('../../data/Fetch_Env/vae_train_data_push.npy')
     data_size = len(data_set)
     data_set = np.split(data_set, data_size / batch_size)
 
-    for batch_idx, data in enumerate(data_set):
+    #mb = master_bar(list(enumerate(data_set)))
+    mb = master_bar_obj
+    pb = progress_bar(list(enumerate(data_set)), parent=mb)
+    #for batch_idx, data in enumerate(data_set):
+    for batch_idx, data in pb:
         data = torch.from_numpy(data).float().to(device)
         data /= 255
         data = data.permute([0, 3, 1, 2])
@@ -92,14 +97,16 @@ def train(epoch, model, optimizer, device, log_interval, batch_size):
                        '../results/recon.png')
             #           'results/recon_' + str(epoch) + '.png')
 
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, (batch_idx+1) * len(data), data_size,
-                100. * (batch_idx+1) / len(data_set),
-                loss.item() / len(data)))
-            print('Loss: ', loss.item() / len(data))
+            #print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            #    epoch, (batch_idx+1) * len(data), data_size,
+            #    100. * (batch_idx+1) / len(data_set),
+            #    loss.item() / len(data)))
+            #print('Loss: ', loss.item() / len(data))
+            mb.comment = f'Loss: {loss.item()}'
 
-    print('====> Epoch: {} Average loss: {:.4f}'.format(
-        epoch, train_loss / data_size))
+    #print('====> Epoch: {} Average loss: {:.4f}'.format(
+    #    epoch, train_loss / data_size))
+    mb.write(f'Average loss: {train_loss / data_size:.4f}')
 
 
 def train_Vae(batch_size=128, epochs=100, no_cuda=False, seed=1, log_interval=9, load=False):
@@ -118,8 +125,9 @@ def train_Vae(batch_size=128, epochs=100, no_cuda=False, seed=1, log_interval=9,
         model = VAE().to(device)
         optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-    for epoch in range(1, epochs + 1):
-        train(epoch, model, optimizer, device, log_interval, batch_size)
+    mb = master_bar(range(1, epochs + 1))
+    for epoch in mb:
+        train(epoch, model, optimizer, device, log_interval, batch_size, master_bar_obj=mb)
         # test(epoch, model, test_loader, batch_size, device)
         # with torch.no_grad():
         #    sample = torch.randn(64, 5).to(device)

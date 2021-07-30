@@ -25,58 +25,58 @@ class DDPG:
 
 	def create_model(self):
 		def create_session():
-			config = tf.ConfigProto()
+			config = tf.compat.v1.ConfigProto()
 			config.gpu_options.allow_growth = True
-			self.sess = tf.Session(config=config)
+			self.sess = tf.compat.v1.Session(config=config)
 
 		def create_inputs():
-			self.raw_obs_ph = tf.placeholder(tf.float32, [None]+self.args.obs_dims, name='raw_obs_ph') # TODO: changed names!
-			self.raw_obs_next_ph = tf.placeholder(tf.float32, [None]+self.args.obs_dims, name='raw_obs_next_ph')
-			self.acts_ph = tf.placeholder(tf.float32, [None]+self.args.acts_dims, name='acts_ph')
-			self.rews_ph = tf.placeholder(tf.float32, [None, 1], name='rews_ph')
+			self.raw_obs_ph = tf.compat.v1.placeholder(tf.float32, [None]+self.args.obs_dims, name='raw_obs_ph') # TODO: changed names!
+			self.raw_obs_next_ph = tf.compat.v1.placeholder(tf.float32, [None]+self.args.obs_dims, name='raw_obs_next_ph')
+			self.acts_ph = tf.compat.v1.placeholder(tf.float32, [None]+self.args.acts_dims, name='acts_ph')
+			self.rews_ph = tf.compat.v1.placeholder(tf.float32, [None, 1], name='rews_ph')
 
 		def create_normalizer():
-			with tf.variable_scope('normalizer'):
+			with tf.compat.v1.variable_scope('normalizer'):
 				self.obs_normalizer = Normalizer(self.args.obs_dims, self.sess)
 			self.obs_ph = self.obs_normalizer.normalize(self.raw_obs_ph)
 			self.obs_next_ph = self.obs_normalizer.normalize(self.raw_obs_next_ph)
 
 		def create_network():
 			def mlp_policy(obs_ph):
-				with tf.variable_scope('net', initializer=tf.contrib.layers.xavier_initializer()):
-					pi_dense1 = tf.layers.dense(obs_ph, 256, activation=tf.nn.relu, name='pi_dense1')
-					pi_dense2 = tf.layers.dense(pi_dense1, 256, activation=tf.nn.relu, name='pi_dense2')
-					pi_dense3 = tf.layers.dense(pi_dense2, 256, activation=tf.nn.relu, name='pi_dense3')
-					pi = tf.layers.dense(pi_dense3, self.args.acts_dims[0], activation=tf.nn.tanh, name='pi')
+				with tf.compat.v1.variable_scope('net', initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform")):
+					pi_dense1 = tf.compat.v1.layers.dense(obs_ph, 256, activation=tf.nn.relu, name='pi_dense1')
+					pi_dense2 = tf.compat.v1.layers.dense(pi_dense1, 256, activation=tf.nn.relu, name='pi_dense2')
+					pi_dense3 = tf.compat.v1.layers.dense(pi_dense2, 256, activation=tf.nn.relu, name='pi_dense3')
+					pi = tf.compat.v1.layers.dense(pi_dense3, self.args.acts_dims[0], activation=tf.nn.tanh, name='pi')
 				return pi
 
 			def mlp_value(obs_ph, acts_ph):
 				state_ph = tf.concat([obs_ph, acts_ph], axis=1)
-				with tf.variable_scope('net', initializer=tf.contrib.layers.xavier_initializer()):
-					q_dense1 = tf.layers.dense(state_ph, 256, activation=tf.nn.relu, name='q_dense1')
-					q_dense2 = tf.layers.dense(q_dense1, 256, activation=tf.nn.relu, name='q_dense2')
-					q_dense3 = tf.layers.dense(q_dense2, 256, activation=tf.nn.relu, name='q_dense3')
-					q = tf.layers.dense(q_dense3, 1, name='q')
+				with tf.compat.v1.variable_scope('net', initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform")):
+					q_dense1 = tf.compat.v1.layers.dense(state_ph, 256, activation=tf.nn.relu, name='q_dense1')
+					q_dense2 = tf.compat.v1.layers.dense(q_dense1, 256, activation=tf.nn.relu, name='q_dense2')
+					q_dense3 = tf.compat.v1.layers.dense(q_dense2, 256, activation=tf.nn.relu, name='q_dense3')
+					q = tf.compat.v1.layers.dense(q_dense3, 1, name='q')
 				return q
 
-			with tf.variable_scope('main'):
-				with tf.variable_scope('policy'):
+			with tf.compat.v1.variable_scope('main'):
+				with tf.compat.v1.variable_scope('policy'):
 					self.pi = mlp_policy(self.obs_ph)
-				with tf.variable_scope('value'):
+				with tf.compat.v1.variable_scope('value'):
 					self.q = mlp_value(self.obs_ph, self.acts_ph)
-				with tf.variable_scope('value', reuse=True):
+				with tf.compat.v1.variable_scope('value', reuse=True):
 					self.q_pi = mlp_value(self.obs_ph, self.pi)
 
-			with tf.variable_scope('target'):
-				with tf.variable_scope('policy'):
+			with tf.compat.v1.variable_scope('target'):
+				with tf.compat.v1.variable_scope('policy'):
 					self.pi_t = mlp_policy(self.obs_next_ph)
-				with tf.variable_scope('value'):
+				with tf.compat.v1.variable_scope('value'):
 					self.q_t = mlp_value(self.obs_next_ph, self.pi_t)
 
 		def create_operators():
-			self.pi_q_loss = -tf.reduce_mean(self.q_pi)
-			self.pi_l2_loss = self.args.act_l2*tf.reduce_mean(tf.square(self.pi))
-			self.pi_optimizer = tf.train.AdamOptimizer(self.args.pi_lr)
+			self.pi_q_loss = -tf.reduce_mean(input_tensor=self.q_pi)
+			self.pi_l2_loss = self.args.act_l2*tf.reduce_mean(input_tensor=tf.square(self.pi))
+			self.pi_optimizer = tf.compat.v1.train.AdamOptimizer(self.args.pi_lr)
 			self.pi_train_op = self.pi_optimizer.minimize(self.pi_q_loss+self.pi_l2_loss, var_list=get_vars('main/policy'))
 
 			if self.args.clip_return:
@@ -84,8 +84,8 @@ class DDPG:
 			else:
 				return_value = self.q_t
 			target = tf.stop_gradient(self.rews_ph+self.args.gamma*return_value)
-			self.q_loss = tf.reduce_mean(tf.square(self.q-target))
-			self.q_optimizer = tf.train.AdamOptimizer(self.args.q_lr)
+			self.q_loss = tf.reduce_mean(input_tensor=tf.square(self.q-target))
+			self.q_optimizer = tf.compat.v1.train.AdamOptimizer(self.args.q_lr)
 			self.q_train_op = self.q_optimizer.minimize(self.q_loss, var_list=get_vars('main/value'))
 
 			self.target_update_op = tf.group([
@@ -93,8 +93,8 @@ class DDPG:
 				for v, v_t in zip(get_vars('main'), get_vars('target'))
 			])
 
-			self.saver=tf.train.Saver(max_to_keep=100)
-			self.init_op = tf.global_variables_initializer()
+			self.saver=tf.compat.v1.train.Saver(max_to_keep=100)
+			self.init_op = tf.compat.v1.global_variables_initializer()
 			self.target_init_op = tf.group([
 				v_t.assign(v)
 				for v, v_t in zip(get_vars('main'), get_vars('target'))
