@@ -14,6 +14,21 @@ It is based on the implementation of G-HGG (Matthias Brucker, 2020).
 6. Download the directory 'figure' from [https://syncandshare.lrz.de/getlink/fiPycjdBkzfaXTsmiTDaGcKP/I-HGG_data] and place it into the project root directory for plotting the results from the paper
 ```bash
 pip install -r requirements.txt
+
+
+To use the gym environments that are in the `gym` folder, you will need to run
+```
+pip3 uninstall gym
+```
+
+and
+```
+cd gym
+pip install -e .
+```
+.
+
+
 ```
 
 ## Running commands from I-HGG
