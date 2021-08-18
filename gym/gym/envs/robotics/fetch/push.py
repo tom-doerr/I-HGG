@@ -5,6 +5,7 @@ from gym import utils
 from gym.envs.robotics import fetch_env
 from vae.import_vae import goal_set_fetch_push
 from vae.import_vae import vae_fetch_push
+from vae.import_vae import vae2
 from torchvision.utils import save_image
 from PIL import Image
 import numpy as np
@@ -17,6 +18,12 @@ import numpy as np
 # Ensure we get the path separator correct on windows
 MODEL_XML_PATH = os.path.join('fetch', 'push.xml')
 
+if True:
+    vae_in_use = vae_fetch_push
+else:
+    vae_in_use = vae2
+
+print("vae_in_use:", vae_in_use)
 
 class FetchPushEnv(fetch_env.FetchEnv, utils.EzPickle):
     def __init__(self, reward_type='sparse'):
@@ -35,10 +42,10 @@ class FetchPushEnv(fetch_env.FetchEnv, utils.EzPickle):
 
     def _sample_goal(self):
         goal = goal_set_fetch_push[np.random.randint(7)]
-        goal = vae_fetch_push.format(goal)
+        goal = vae_in_use.format(goal)
         save_image(goal.cpu().view(-1, 3, self.img_size, self.img_size), 'videos/goal/goal.png')
-        x, y = vae_fetch_push.encode(goal)
-        goal = vae_fetch_push.reparameterize(x, y)
+        x, y = vae_in_use.encode(goal)
+        goal = vae_in_use.reparameterize(x, y)
         goal = goal.detach().cpu().numpy()
         goal = np.squeeze(goal)
         return goal.copy()
@@ -48,9 +55,9 @@ class FetchPushEnv(fetch_env.FetchEnv, utils.EzPickle):
                              width=84, height=84))
         rgb_array = np.array(self.render(mode='rgb_array',
                                          width=84, height=84))
-        tensor = vae_fetch_push.format(rgb_array)
-        x, y = vae_fetch_push.encode(tensor)
-        obs = vae_fetch_push.reparameterize(x, y)
+        tensor = vae_in_use.format(rgb_array)
+        x, y = vae_in_use.encode(tensor)
+        obs = vae_in_use.reparameterize(x, y)
         obs = obs.detach().cpu().numpy()
         obs = np.squeeze(obs)
         save_image(tensor.cpu().view(-1, 3, 84, 84), 'ach_fetch_push.png')
@@ -76,3 +83,8 @@ class FetchPushEnv(fetch_env.FetchEnv, utils.EzPickle):
         # Image.fromarray(np.array(self.render(mode='rgb_array', width=300, height=300, cam_name="cam_0"))).show()
 
         # latent = self._get_image()
+
+
+
+
+
