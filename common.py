@@ -86,6 +86,7 @@ def get_args():
 
 def experiment_setup(args):
 	env = make_env(args)
+	#env = make_env(args); print("env:", env); input()
 	env_test = make_env(args)
 	if args.goal_based:
 		args.obs_dims = list(goal_based_process(env.reset()).shape)
