@@ -19,6 +19,14 @@ from vae.import_vae import goal_set_fetch_pick_0
 # Ensure we get the path separator correct on windows
 MODEL_XML_PATH = os.path.join('fetch', 'pick_and_place.xml')
 
+from vae.import_vae import vae2
+
+USE_NEW_VAE = True
+if USE_NEW_VAE:
+    vae_in_use = vae2
+else:
+    vae_in_use = vae_fetch_pick_0
+
 
 class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
     def __init__(self, reward_type='sparse'):
@@ -51,14 +59,14 @@ class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
         index = np.random.randint(20)
         goal_0 = goal_set_fetch_pick_0[index]
         #goal_1 = goal_set_fetch_pick_1[index]
-        goal_0 = vae_fetch_pick_0.format(goal_0)
+        goal_0 = vae_in_use.format(goal_0)
         #goal_1 = self.fetch_pick_vae_1.format(goal_1)
-        save_image(goal_0.cpu().view(-1, 3, self.img_size, self.img_size), 'videos/goal/goal.png')
+        #save_image(goal_0.cpu().view(-1, 3, self.img_size, self.img_size), 'videos/goal/goal.png')
         #save_image(goal_1.cpu().view(-1, 3, self.img_size, self.img_size), 'videos/goal/goal_1.png')
 
-        x_0, y_0 = vae_fetch_pick_0.encode(goal_0)
+        x_0, y_0 = vae_in_use.encode(goal_0)
         #x_1, y_1 = self.fetch_pick_vae_1.encode(goal_1)
-        goal_0 = vae_fetch_pick_0.reparameterize(x_0, y_0)
+        goal_0 = vae_in_use.reparameterize(x_0, y_0)
         #goal_1 = self.fetch_pick_vae_1.reparameterize(x_1, y_1)
         goal_0 = goal_0.detach().cpu().numpy()
         #goal_1 = goal_1.detach().cpu().numpy()
@@ -70,13 +78,17 @@ class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
         return goal.copy()
 
     def _get_image(self):
-        rgb_array_0 = np.array(self.render(mode='rgb_array', width=84, height=84, cam_name="cam_0"))
+        if USE_NEW_VAE:
+            rgb_array_0 = np.array(self.render(mode='rgb_array', width=64, height=64, cam_name="cam_0"))
+        else:
+            rgb_array_0 = np.array(self.render(mode='rgb_array', width=84, height=84, cam_name="cam_0"))
         #rgb_array_1 = np.array(self.render(mode='rgb_array', width=84, height=84, cam_name="cam_1"))
-        tensor_0 = vae_fetch_pick_0.format(rgb_array_0)
+        tensor_0 = vae_in_use.format(rgb_array_0)
         #tensor_1 = self.fetch_pick_vae_1.format(rgb_array_1)
-        x_0, y_0 = vae_fetch_pick_0.encode(tensor_0)
+        x_0, y_0 = vae_in_use.encode(tensor_0)
+        #print("x_0, y_0:", x_0, y_0)
         #x_1, y_1 = self.fetch_pick_vae_1.encode(tensor_1)
-        obs_0 = vae_fetch_pick_0.reparameterize(x_0, y_0)
+        obs_0 = vae_in_use.reparameterize(x_0, y_0)
         #obs_1 = self.fetch_pick_vae_1.reparameterize(x_1, y_1)
         obs_0 = obs_0.detach().cpu().numpy()
         #obs_1 = obs_1.detach().cpu().numpy()
@@ -85,7 +97,7 @@ class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
         obs = np.squeeze(obs_0)
         # obs /= 5.1
 
-        save_image(tensor_0.cpu().view(-1, 3, 84, 84), 'fetch_pick_0.png')
+        #save_image(tensor_0.cpu().view(-1, 3, 84, 84), 'fetch_pick_0.png')
         #save_image(tensor_1.cpu().view(-1, 3, 84, 84), 'fetch_pick_1.png')
         return obs
 
