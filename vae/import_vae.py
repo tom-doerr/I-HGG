@@ -3,7 +3,7 @@ import vae.fetch_vae.vae_fetch_push as VAE_PUSH
 import vae.fetch_vae.vae_fetch_reach as VAE_FETCH_REACH
 import vae.fetch_vae.vae_fetch_slide as VAE_FETCH_SLIDE
 import vae.fetch_vae.vae_fetch_pick_0 as VAE_FETCH_PICK_0
-import vae.fetch_vae.vae_fetch_pick_1 as VAE_FETCH_PICK_1
+#import vae.fetch_vae.vae_fetch_pick_1 as VAE_FETCH_PICK_1
 
 import vae.hand_vae.train_hand_egg_vae as VAE_EGG
 import vae.hand_vae.train_hand_reach_vae as VAE_HAND_REACH
@@ -48,3 +48,8 @@ goal_set_reach = np.load('data/Hand_Env/reach_goal_set.npy')
 #goal_set_1 = old_training_data_1[index]
 #np.save('data/Hand_Env/block_goal_set.npy', goal_set_0)
 #np.save('data/Fetch_Env/pick_goal_set_1.npy', goal_set_1)
+
+#from vae2.solver import VAEWrapped as VAEWrapped
+from vae2.solver import VAEWrapped
+vae2 = VAEWrapped()
+
