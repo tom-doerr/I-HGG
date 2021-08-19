@@ -66,7 +66,7 @@ class IHGGDataset(Dataset):
         self.vis = visdom.Visdom()
 
     def __getitem__(self, index):
-        index = 0
+        # index = 0
 
 
 
