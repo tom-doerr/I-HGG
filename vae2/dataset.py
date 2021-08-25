@@ -62,7 +62,7 @@ def get_x_y_from_index(index):
 
 class IHGGDataset(Dataset):
     def __init__(self):
-        self.data_set = np.load('ihgg_data/Fetch_Env/vae_train_data_pick_0.npy')
+        self.data_set = np.load('ihgg_data/Fetch_Env/vae_train_data_pick_0.npy')[:10000]
         self.vis = visdom.Visdom()
 
     def __getitem__(self, index):
@@ -79,9 +79,15 @@ class IHGGDataset(Dataset):
         #image = np.array(image, dtype=float)
         image = torch.tensor(image, dtype=torch.float)
         image /= 255
+        # print("image:", image)
+        image[image != 1] = 0
+        # print("image:", image.shape)
+        # print("image:", image.dtype)
+        # print("image:", image.min())
+        # print("image:", image.max())
+        # print("image:", image.mean())
         if index % 1000 == 0:
             self.vis.image(np.array(image).repeat(4,1).repeat(4,2), win=0)
-        print("image:", image)
         return image
 
     def __len__(self):
@@ -104,7 +110,12 @@ class GoalPosPreDataset(Dataset):
         image = self.images[index]
         if index % 1000 == 0:
             self.vis.image(np.array(image).repeat(4,1).repeat(4,2), win=0)
-        print("image:", image)
+        # print("image:", image)
+        # print("image:", image.shape)
+        # print("image:", image.dtype)
+        # print("image:", image.min())
+        # print("image:", image.max())
+        # print("image:", image.mean())
         return image
 
     def __len__(self):
