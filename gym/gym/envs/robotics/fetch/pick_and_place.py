@@ -27,6 +27,9 @@ if USE_NEW_VAE:
 else:
     vae_in_use = vae_fetch_pick_0
 
+from visdom import Visdom
+
+viz = Visdom()
 
 class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
     def __init__(self, reward_type='sparse'):
@@ -84,13 +87,21 @@ class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
             rgb_array_0 = np.array(self.render(mode='rgb_array', width=84, height=84, cam_name="cam_0"))
         #rgb_array_1 = np.array(self.render(mode='rgb_array', width=84, height=84, cam_name="cam_1"))
         tensor_0 = vae_in_use.format(rgb_array_0)
+        viz.image(tensor_0, win='tensor_0')
         #tensor_1 = self.fetch_pick_vae_1.format(rgb_array_1)
         x_0, y_0 = vae_in_use.encode(tensor_0)
+        # print("x_0:", x_0)
+        # viz.scatter(x_0.cpu().detach().unsqueeze(0).numpy(), win='xy_scatter')
         #print("x_0, y_0:", x_0, y_0)
         #x_1, y_1 = self.fetch_pick_vae_1.encode(tensor_1)
         obs_0 = vae_in_use.reparameterize(x_0, y_0)
         #obs_1 = self.fetch_pick_vae_1.reparameterize(x_1, y_1)
         obs_0 = obs_0.detach().cpu().numpy()
+        # if USE_NEW_VAE:
+            # obs_0 *= 100
+        # print("obs_0:", obs_0)
+        # viz.scatter(obs_0[np.newaxis, :], win='xy_scatter')
+
         #obs_1 = obs_1.detach().cpu().numpy()
 
         #obs = np.concatenate((np.squeeze(obs_0), np.squeeze(obs_1)))
@@ -99,6 +110,9 @@ class FetchPickAndPlaceEnv(fetch_env.FetchEnv, utils.EzPickle):
 
         #save_image(tensor_0.cpu().view(-1, 3, 84, 84), 'fetch_pick_0.png')
         #save_image(tensor_1.cpu().view(-1, 3, 84, 84), 'fetch_pick_1.png')
+        if USE_NEW_VAE:
+            obs /= 10
+        # print("obs:", obs)
         return obs
 
     def _generate_state(self):
