@@ -652,6 +652,29 @@ class Solver(object):
         pbar.write("[Training Finished]")
         pbar.close()
 
+#    def create_grid_pattern_of_points(self):
+#        '''Creates a grid pattern of coordinates that are
+#        all stored in a single list.''
+#        The grid pattern is created using two for loops.
+#        '''                            
+#        '''
+#        The first for loop creates the x coordinates.
+#        The second for loop creates the y coordinates.
+#        The two for loops are nested.
+#        '''
+#        x_coords = []
+#        y_coords = []
+#        for x in range(self.grid_size):
+#            for y in range(self.grid_size):
+#                x_coords.append(x)
+#        y_coords = []
+#        for y in range(self.grid_size):
+#            for x in range(self.grid_size):
+#                y_co:ords.append(y)
+#        #print("x_coords:", x_coords)
+#        #print("y_coords:", y_coords)
+#        #print("len(x_coords):", len(x_coords))
+#        #print("
 
     def viz_reconstruction_2(self):
         self.net_mode(train=False)
@@ -940,7 +963,7 @@ class VAEWrapped():
         self.img_size = 84
 
     def load_weights(self):
-        checkpoint = torch.load('checkpoints/main/last')
+        checkpoint = torch.load('vae2/checkpoints/main/last')
         self.net.load_state_dict(checkpoint['model_states']['net'])
 
     def encode(self, x):
